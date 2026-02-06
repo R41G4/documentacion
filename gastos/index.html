@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Proyecto de Gestión de Gastos</title>
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+    <header>
+        <h1>📊 Proyecto de Gestión de Gastos</h1>
+        <p class="subtitle">Guía completa de desarrollo - De la idea a la implementación</p>
+    </header>
+
+    <section>
+        <h2>🎯 Objetivo del Proyecto</h2>
+        <p>Crear una aplicación web completa para gestión de gastos personales que permita:</p>
+        <ul>
+            <li>Establecer y modificar un presupuesto inicial</li>
+            <li>Registrar gastos organizados por categorías</li>
+            <li>Visualizar estadísticas financieras en tiempo real</li>
+            <li>Mantener persistencia de datos entre sesiones</li>
+            <li>Ofrecer una experiencia responsive en todos los dispositivos</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>🚀 Fases de Desarrollo</h2>
+        
+        <div class="phase">
+            <h3>Fase 1: Estructura Base (HTML)</h3>
+            <p><strong>Enfoque:</strong> Mobile-first y semántica HTML5</p>
+            <p><strong>Componentes principales identificados:</strong></p>
+            <div class="grid">
+                <div class="card">
+                    <h4>📋 Cabecera</h4>
+                    <p>Logo y título de la aplicación</p>
+                </div>
+                <div class="card">
+                    <h4>💰 Presupuesto</h4>
+                    <p>Input para establecer presupuesto inicial</p>
+                </div>
+                <div class="card">
+                    <h4>📈 Estadísticas</h4>
+                    <p>3 secciones: generales, categoría mayor, por categoría</p>
+                </div>
+                <div class="card">
+                    <h4>📝 Lista de Gastos</h4>
+                    <p>Lista dinámica con botón de eliminación</p>
+                </div>
+                <div class="card">
+                    <h4>🎛️ Controles</h4>
+                    <p>Botones para limpiar todo y agregar gastos</p>
+                </div>
+                <div class="card">
+                    <h4>🪟 Modal</h4>
+                    <p>Ventana emergente para agregar nuevos gastos</p>
+                </div>
+            </div>
+            
+            <p><strong>Técnica clave:</strong> Uso de <span class="highlight">&lt;template&gt;</span> para elementos dinámicos</p>
+            <div class="code-block">
+&lt;template id="expense-template"&gt;
+  &lt;li class="expense"&gt;
+    &lt;div class="expense__category-group"&gt;
+      &lt;button class="expense__delete-btn"&gt;&lt;/button&gt;
+      &lt;p class="expense__category"&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;p class="expense__amount"&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/template&gt;
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 2: Estilos y Responsividad (CSS)</h3>
+            <p><strong>Metodología:</strong> BEM (Block-Element-Modifier)</p>
+            
+            <p><strong>Sistema de grid principal:</strong></p>
+            <div class="code-block">
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* 3 columnas en desktop */
+  gap: 20px;
+  padding: 0 80px;
+}
+
+/* Responsive: 1 columna en móvil */
+@media screen and (max-width: 627px) {
+  .content {
+    grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+}
+            </div>
+            
+            <p><strong>Sistema de color semántico para estados financieros:</strong></p>
+            <div class="code-block">
+.stats__item-value_balance_negative {
+  color: rgba(232, 77, 89, 1); /* Rojo: balance negativo */
+}
+
+.stats__item-value_balance_warning {
+  color: rgba(247, 184, 38, 1); /* Naranja: menos del 25% del presupuesto */
+}
+
+.stats__item-value_balance_positive {
+  color: rgba(26, 183, 89, 1); /* Verde: balance saludable */
+}
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 3: Lógica de Datos (JavaScript - calculations.js)</h3>
+            
+            <p><strong>Estructura de datos principal:</strong></p>
+            <div class="code-block">
+// Array bidimensional: [categoría, monto]
+let expenseEntries = [
+  ["groceries", 33],
+  ["restaurants", 50],
+  ["transport", 12],
+  ["home", 70],
+  ["subscriptions", 14]
+];
+
+// Variables de estado
+let budgetValue = 0;
+let totalExpensesValue = 0;
+            </div>
+            
+            <p><strong>Funciones de cálculo implementadas:</strong></p>
+            <table>
+                <tr>
+                    <th>Función</th>
+                    <th>Propósito</th>
+                    <th>Complejidad</th>
+                </tr>
+                <tr>
+                    <td>calculateAverageExpense()</td>
+                    <td>Calcula el gasto promedio por transacción</td>
+                    <td>O(1)</td>
+                </tr>
+                <tr>
+                    <td>calculateBalance()</td>
+                    <td>Calcula saldo (presupuesto - gastos)</td>
+                    <td>O(1)</td>
+                </tr>
+                <tr>
+                    <td>calculateCategoryExpenses()</td>
+                    <td>Suma todos los gastos de una categoría</td>
+                    <td>O(n)</td>
+                </tr>
+                <tr>
+                    <td>calculateLargestCategory()</td>
+                    <td>Identifica categoría con mayor gasto</td>
+                    <td>O(n + m)</td>
+                </tr>
+            </table>
+            
+            <p><strong>Algoritmo para encontrar categoría más grande:</strong></p>
+            <ol>
+                <li>Obtener categorías únicas del array</li>
+                <li>Para cada categoría única, calcular su total</li>
+                <li>Comparar totales y mantener el máximo</li>
+                <li>Devolver categoría con mayor gasto</li>
+            </ol>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 4: Interfaz Interactiva (JavaScript - handle-html.js)</h3>
+            
+            <p><strong>Patrón de selección de elementos:</strong></p>
+            <div class="code-block">
+// Selección de elementos una vez al inicio
+const budgetInput = document.querySelector(".budget__input");
+const totalExpensesValueElement = document.querySelector("#total-expenses-value");
+const modal = document.querySelector("#add-expense-modal");
+            </div>
+            
+            <p><strong>Sistema de gestión de eventos:</strong></p>
+            <div class="code-block">
+// Configuración centralizada de event listeners
+openModalBtn.addEventListener("click", openModal);
+closeModalBtn.addEventListener("click", closeModal);
+addExpenseModalForm.addEventListener("submit", handleAddExpenseSubmit);
+budgetSetButton.addEventListener("click", handleSaveBudget);
+clearAllStatsButton.addEventListener("click", clearLocalStorage);
+            </div>
+            
+            <p><strong>Renderizado dinámico de gastos:</strong></p>
+            <div class="code-block">
+function createExpenseListItem(data) {
+  // 1. Clonar la plantilla
+  const expenseElement = expenseTemplate.content
+    .querySelector(".expense")
+    .cloneNode(true);
+  
+  // 2. Poblar con datos
+  expenseElement.querySelector(".expense__category").textContent = categoryNames[data[0]];
+  expenseElement.querySelector(".expense__amount").textContent = data[1].toFixed(2);
+  
+  // 3. Agregar event listener para eliminar
+  expenseElement.querySelector(".expense__delete-btn")
+    .addEventListener("click", () => handleDeleteExpense(expenseElement, data));
+  
+  return expenseElement;
+}
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 5: Persistencia y Estado (JavaScript - index.js)</h3>
+            
+            <p><strong>Sistema de localStorage:</strong></p>
+            <div class="code-block">
+function saveToLocalStorage(itemName, itemValue) {
+  // Convierte arrays a JSON para almacenamiento
+  if (Array.isArray(itemValue)) {
+    itemValue = JSON.stringify(itemValue);
+  }
+  localStorage.setItem(itemName, itemValue);
+}
+
+function loadFromLocalStorage() {
+  // Carga datos al iniciar
+  const storedBudget = localStorage.getItem("budgetValue");
+  const storedExpenses = localStorage.getItem("expenseEntries");
+  
+  if (storedBudget) budgetValue = parseFloat(storedBudget);
+  if (storedExpenses) expenseEntries = JSON.parse(storedExpenses);
+}
+            </div>
+            
+            <p><strong>Flujo de inicialización:</strong></p>
+            <ol>
+                <li><code>loadFromLocalStorage()</code> - Carga datos guardados</li>
+                <li><code>updateExpensesList()</code> - Renderiza gastos en UI</li>
+                <li><code>setStats()</code> - Calcula y muestra todas las estadísticas</li>
+            </ol>
+            
+            <p><strong>Función central de actualización:</strong></p>
+            <div class="code-block">
+function setStats() {
+  // Actualiza TODOS los elementos de UI
+  totalExpensesValueElement.textContent = totalExpensesValue.toFixed(2);
+  averageExpenseValueElement.textContent = calculateAverageExpense(...).toFixed(2);
+  balanceValueElement.textContent = calculateBalance(...).toFixed(2);
+  // ... más actualizaciones
+}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>⚡ Desafíos Técnicos y Soluciones</h2>
+        
+        <div class="challenge">
+            <h4>Desafío 1: Sincronización en tiempo real</h4>
+            <p><strong>Problema:</strong> Cambios en gastos deben reflejarse inmediatamente en todas las estadísticas</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Función unificada de actualización</h4>
+            <p>Crear función <code>setStats()</code> que recalcula y actualiza todos los elementos de UI</p>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 2: Persistencia entre sesiones</h4>
+            <p><strong>Problema:</strong> Los datos se pierden al recargar la página</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: localStorage con serialización JSON</h4>
+            <p>Guardar arrays como strings JSON y parsearlos al cargar</p>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 3: Responsividad compleja</h4>
+            <p><strong>Problema:</strong> Grid de 3 columnas debe adaptarse a 1 columna en móviles</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Media queries con cambio de span</h4>
+            <div class="code-block">
+/* Desktop: span 3 columnas */
+.stats_general { grid-column: span 3; }
+
+/* Móvil: span 1 columna */
+@media (max-width: 627px) {
+  .stats_general { grid-column: span 1; }
+}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>🏗️ Arquitectura de Decisiones</h2>
+        
+        <h3>Separación de Responsabilidades</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>📊 calculations.js</h4>
+                <p><strong>Responsabilidad:</strong> Lógica pura de cálculo</p>
+                <p><strong>Característica:</strong> Sin manipulación de DOM</p>
+                <p><strong>Ejemplo:</strong> Funciones matemáticas financieras</p>
+            </div>
+            <div class="card">
+                <h4>🎨 handle-html.js</h4>
+                <p><strong>Responsabilidad:</strong> Manipulación de DOM</p>
+                <p><strong>Característica:</strong> Event listeners y renderizado</p>
+                <p><strong>Ejemplo:</strong> Crear elementos, manejar clics</p>
+            </div>
+            <div class="card">
+                <h4>💾 index.js</h4>
+                <p><strong>Responsabilidad:</strong> Estado y persistencia</p>
+                <p><strong>Característica:</strong> Inicialización y localStorage</p>
+                <p><strong>Ejemplo:</strong> Guardar/cargar datos</p>
+            </div>
+        </div>
+        
+        <h3>Patrones Utilizados</h3>
+        <table>
+            <tr>
+                <th>Patrón</th>
+                <th>Implementación</th>
+                <th>Beneficio</th>
+            </tr>
+            <tr>
+                <td>Single Source of Truth</td>
+                <td><code>expenseEntries</code> como única fuente</td>
+                <td>Consistencia de datos</td>
+            </tr>
+            <tr>
+                <td>Unidirectional Data Flow</td>
+                <td>Datos → Cálculos → UI</td>
+                <td>Fácil depuración</td>
+            </tr>
+            <tr>
+                <td>Template Pattern</td>
+                <td>Uso de <code>&lt;template&gt;</code> HTML</td>
+                <td>Reutilización de elementos</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>📱 Flujo de Trabajo Completo</h2>
+        
+        <h3>Escenario: Agregar un nuevo gasto</h3>
+        <ol>
+            <li><strong>Usuario hace clic en "Nuevo gasto"</strong> → <code>openModal()</code> se ejecuta</li>
+            <li><strong>Usuario selecciona categoría e ingresa monto</strong> → Validación básica en formulario</li>
+            <li><strong>Usuario hace clic en "Agregar"</strong> → <code>handleAddExpenseSubmit()</code> se activa:
+                <div class="code-block">
+function handleAddExpenseSubmit(evt) {
+  evt.preventDefault();
+  
+  // 1. Obtener datos del formulario
+  const values = [categoria, Number(monto)];
+  
+  // 2. Agregar al array de datos
+  addExpenseEntry(values);
+  
+  // 3. Guardar en localStorage
+  saveToLocalStorage("expenseEntries", expenseEntries);
+  
+  // 4. Agregar a la lista visual
+  addExpenseToList(values);
+  
+  // 5. Actualizar todas las estadísticas
+  setStats();
+  
+  // 6. Cerrar y limpiar modal
+  closeModal();
+  evt.target.reset();
+}
+                </div>
+            </li>
+            <li><strong>La UI se actualiza automáticamente:</strong>
+                <ul>
+                    <li>Nuevo elemento aparece en la lista</li>
+                    <li>Gastos totales aumentan</li>
+                    <li>Promedio se recalcula</li>
+                    <li>Balance disminuye</li>
+                    <li>Estadísticas por categoría se actualizan</li>
+                    <li>Color del balance puede cambiar</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>🎓 Lecciones Aprendidas</h2>
+        
+        <h3>Lo que funcionó bien ✅</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>BEM para CSS</h4>
+                <p>Facilitó mantenimiento y escalabilidad del código CSS</p>
+            </div>
+            <div class="card">
+                <h4>Separación por funcionalidad</h4>
+                <p>Código más fácil de depurar y extender</p>
+            </div>
+            <div class="card">
+                <h4>localStorage simple</h4>
+                <p>Suficiente para necesidades básicas de persistencia</p>
+            </div>
+        </div>
+        
+        <h3>Mejoras posibles 🔧</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>Validación robusta</h4>
+                <p>Evitar gastos negativos o valores no numéricos</p>
+            </div>
+            <div class="card">
+                <h4>Animaciones</h4>
+                <p>Transiciones suaves para cambios de estado</p>
+            </div>
+            <div class="card">
+                <h4>Categorías dinámicas</h4>
+                <p>Sistema extensible para agregar nuevas categorías</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>📝 Puntos Clave para Replicar</h2>
+        
+        <ol>
+            <li><strong>Comienza con el modelo de datos:</strong> Define cómo almacenarás la información antes de escribir código</li>
+            <li><strong>Implementa la funcionalidad básica primero:</strong> CRUD simple (crear, leer, actualizar, eliminar)</li>
+            <li><strong>Añade estadísticas progresivamente:</strong> Comienza con totales, luego promedios, categorías, etc.</li>
+            <li><strong>Hazlo responsivo desde el inicio:</strong> Enfoque mobile-first ahorra tiempo</li>
+            <li><strong>Agrega persistencia al final:</strong> Primero que funcione en memoria, luego añade localStorage</li>
+            <li><strong>Prueba con datos reales:</strong> Usa casos de uso reales para validar la funcionalidad</li>
+        </ol>
+    </section>
+
+    <footer>
+        <p>📄 Documentación creada para el proyecto de Gestión de Gastos</p>
+        <p>🔄 Última actualización: <span id="current-date"></span></p>
+    </footer>
+
+    <script>
+        // Fecha actual automática
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Efecto de scroll suave para anclas
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
