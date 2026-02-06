@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Galería Interactiva "Around"</title>
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+    <header>
+        <h1>📸 Proyecto: Galería Interactiva "Around"</h1>
+        <p class="subtitle">Guía completa de desarrollo - Frontend con POO, Módulos y API REST</p>
+        <div class="metadata">
+            <span class="tag">🌐 Arquitectura: Frontend + API REST</span>
+            <span class="tag">🧩 Patrón: Clases ES6 + Módulos</span>
+            <span class="tag">⚡ Estado: Persistente en servidor</span>
+        </div>
+    </header>
+
+    <section>
+        <h2>🎯 Objetivo del Proyecto</h2>
+        <p>Desarrollar una aplicación web full-stack de galería social de imágenes que permita:</p>
+        <ul>
+            <li>Visualizar una galería de tarjetas obtenidas desde una <strong>API REST</strong></li>
+            <li>Interactuar con contenido persistente (dar "me gusta", eliminar) mediante llamadas a la API</li>
+            <li>Modificar y guardar información del perfil en el servidor</li>
+            <li>Agregar nuevas tarjetas que se persistan en la base de datos</li>
+            <li>Construir una arquitectura frontend escalable basada en Clases, con una capa de servicio API independiente</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>🚀 Fases de Desarrollo</h2>
+        
+        <div class="phase">
+            <h3>Fase 1: Estructura Semántica y Componentes (HTML)</h3>
+            <p><strong>Enfoque:</strong> Marcado semántico para componentes interactivos y modales</p>
+            <p><strong>Componentes principales identificados:</strong></p>
+            <div class="grid">
+                <div class="card">
+                    <h4>👤 Cabecera de Perfil</h4>
+                    <p>Información del usuario con avatar, nombre, descripción y botón de edición</p>
+                </div>
+                <div class="card">
+                    <h4>🖼️ Sección de Galería</h4>
+                    <p>Contenedor grid para la lista dinámica de tarjetas obtenidas de la API</p>
+                </div>
+                <div class="card">
+                    <h4>➕ Botón "Añadir"</h4>
+                    <p>Control para abrir el formulario de creación de nueva tarjeta</p>
+                </div>
+                <div class="card">
+                    <h4>✏️ Popup de Edición de Perfil</h4>
+                    <p>Formulario modal para actualizar datos que se guardan en el servidor</p>
+                </div>
+                <div class="card">
+                    <h4>🆕 Popup "Añadir Lugar"</h4>
+                    <p>Formulario modal para crear tarjetas que se persisten via API</p>
+                </div>
+                <div class="card">
+                    <h4>🖼️ Popup Visualizador de Imagen</h4>
+                    <p>Ventana modal para mostrar imágenes a pantalla completa</p>
+                </div>
+            </div>
+            
+            <p><strong>Técnica clave:</strong> Estructura HTML para popups reutilizables</p>
+            <div class="code-block">
+&lt;!-- Ejemplo de estructura base de un popup con formulario --&gt;
+&lt;div class="popup popup_type_edit-profile"&gt;
+  &lt;div class="popup__container"&gt;
+    &lt;button type="button" class="popup__close-button"&gt;&lt;/button&gt;
+    &lt;h3 class="popup__title"&gt;Editar perfil&lt;/h3&gt;
+    &lt;form class="popup__form" name="edit-profile-form"&gt;
+      &lt;input type="text" name="name" class="popup__input" placeholder="Nombre" required minlength="2" maxlength="40"&gt;
+      &lt;span class="popup__error" id="name-error"&gt;&lt;/span&gt;
+      &lt;input type="text" name="about" class="popup__input" placeholder="Acerca de mí" required minlength="2" maxlength="200"&gt;
+      &lt;span class="popup__error" id="about-error"&gt;&lt;/span&gt;
+      &lt;button type="submit" class="popup__submit-button"&gt;Guardar&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 2: Estilos Componentizados con BEM (CSS)</h3>
+            <p><strong>Metodología:</strong> BEM (Block-Element-Modifier) estricto para todos los componentes</p>
+            
+            <p><strong>Maquetación responsiva con Grid y Flexbox:</strong></p>
+            <div class="code-block">
+/* Grid para la galería de tarjetas - Responsive */
+.places {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(282px, 1fr));
+  grid-auto-rows: auto;
+  gap: 20px;
+  justify-content: center;
+  margin: 50px auto 0;
+  max-width: 880px;
+}
+
+/* Estados de interacción para botones de like */
+.place__like-button {
+  background: url('../images/like-icon.svg') center no-repeat;
+  width: 22px;
+  height: 19px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.place__like-button:hover {
+  opacity: 0.5;
+}
+
+.place__like-button_active {
+  background-image: url('../images/like-icon-active.svg');
+}
+
+/* Animaciones para popups */
+.popup {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.3s, opacity 0.3s linear;
+  position: fixed;
+  /* ... resto de estilos de posición */
+}
+
+.popup_opened {
+  visibility: visible;
+  opacity: 1;
+}
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 3: Arquitectura con Clases y Capa de Servicio API (JavaScript)</h3>
+            
+            <p><strong>Sistema de Clases Principal + Servicio API:</strong></p>
+            <div class="code-block">
+// Estructura modular importada en index.js
+import Api from '../components/Api.js';        // Capa de comunicación con backend
+import Card from '../components/Card.js';      // Componente de tarjeta individual
+import FormValidator from '../components/FormValidator.js';
+import PopupWithImage from '../components/PopupWithImage.js';
+import PopupWithForm from '../components/PopupWithForm.js';
+import UserInfo from '../components/UserInfo.js'; // Maneja datos de usuario desde/hacia API
+import Section from '../components/Section.js';   // Renderizado de listas
+
+// Inicialización de la instancia de API (conexión con backend REST)
+const api = new Api({
+  baseUrl: 'https://around-api.es.tripleten-services.com/v1',
+  headers: {
+    authorization: '152e8305-8c78-4b33-8d0b-2d99e5ea98c7',
+    'Content-Type': 'application/json'
+  }
+});
+            </div>
+            
+            <p><strong>Clases y sus responsabilidades (actualizado con API):</strong></p>
+            <table>
+                <tr>
+                    <th>Clase</th>
+                    <th>Propósito</th>
+                    <th>Métodos Clave</th>
+                </tr>
+                <tr>
+                    <td><code>Api</code></td>
+                    <td><strong class="highlight">Capa de servicio para todas las comunicaciones HTTP con el backend REST.</strong> Encapsula todos los endpoints.</td>
+                    <td><code>getUserInfo()</code>, <code>getInitialCards()</code>, <code>addNewCard()</code>, <code>updateUserInfo()</code>, <code>addLike()</code>, <code>removeLike()</code>, <code>deleteCard()</code>, <code>updateAvatar()</code></td>
+                </tr>
+                <tr>
+                    <td><code>Card</code></td>
+                    <td>Crear y gestionar la interfaz y eventos de una tarjeta individual. <strong>Interactúa con la API para likes/eliminar.</strong></td>
+                    <td><code>generateCard()</code>, <code>handleLike()</code> <em>(con llamada a API)</em>, <code>handleDelete()</code> <em>(con llamada a API)</em></td>
+                </tr>
+                <tr>
+                    <td><code>UserInfo</code></td>
+                    <td>Gestionar la información del perfil. <strong>Obtiene y envía datos al servidor a través de la API.</strong></td>
+                    <td><code>getUserInfo()</code> <em>(desde API)</em>, <code>setUserInfo()</code> <em>(envía a API)</em>, <code>setUserAvatar()</code></td>
+                </tr>
+                <tr>
+                    <td><code>Popup / PopupWithForm</code></td>
+                    <td>Control de ventanas modales y manejo de formularios. <strong>PopupWithForm se integra con API para enviar datos.</strong></td>
+                    <td><code>open()</code>, <code>close()</code>, <code>setEventListeners()</code>, <code>_getInputValues()</code>, <code>renderLoading()</code></td>
+                </tr>
+                <tr>
+                    <td><code>FormValidator</code></td>
+                    <td>Encapsular toda la lógica de validación de formularios en el cliente.</td>
+                    <td><code>enableValidation()</code>, <code>_showInputError()</code>, <code>toggleButtonState()</code>, <code>resetValidation()</code></td>
+                </tr>
+                <tr>
+                    <td><code>Section</code></td>
+                    <td>Renderizar una lista/colección de elementos en el DOM. <strong>Trabaja con datos provenientes de la API.</strong></td>
+                    <td><code>renderItems()</code>, <code>addItem()</code>, <code>clear()</code></td>
+                </tr>
+            </table>
+            
+            <p><strong>Implementación de la clase Api (core del backend):</strong></p>
+            <div class="code-block">
+export class Api {
+  constructor({ baseUrl, headers }) {
+    this._baseUrl = baseUrl;
+    this._headers = headers;
+  }
+
+  _checkResponse(res) {
+    return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
+  }
+
+  // Obtener información del usuario actual
+  getUserInfo() {
+    return fetch(`${this._baseUrl}/users/me`, {
+      headers: this._headers
+    }).then(this._checkResponse);
+  }
+
+  // Obtener todas las tarjetas iniciales
+  getInitialCards() {
+    return fetch(`${this._baseUrl}/cards`, {
+      headers: this._headers
+    }).then(this._checkResponse);
+  }
+
+  // Actualizar perfil del usuario
+  updateUserInfo({ name, about }) {
+    return fetch(`${this._baseUrl}/users/me`, {
+      method: 'PATCH',
+      headers: this._headers,
+      body: JSON.stringify({ name, about })
+    }).then(this._checkResponse);
+  }
+
+  // Crear nueva tarjeta
+  addNewCard({ name, link }) {
+    return fetch(`${this._baseUrl}/cards`, {
+      method: 'POST',
+      headers: this._headers,
+      body: JSON.stringify({ name, link })
+    }).then(this._checkResponse);
+  }
+
+  // Eliminar tarjeta (solo el propietario)
+  deleteCard(cardId) {
+    return fetch(`${this._baseUrl}/cards/${cardId}`, {
+      method: 'DELETE',
+      headers: this._headers
+    }).then(this._checkResponse);
+  }
+
+  // Dar like a una tarjeta
+  addLike(cardId) {
+    return fetch(`${this._baseUrl}/cards/${cardId}/likes`, {
+      method: 'PUT',
+      headers: this._headers
+    }).then(this._checkResponse);
+  }
+
+  // Quitar like a una tarjeta
+  removeLike(cardId) {
+    return fetch(`${this._baseUrl}/cards/${cardId}/likes`, {
+      method: 'DELETE',
+      headers: this._headers
+    }).then(this._checkResponse);
+  }
+
+  // Actualizar avatar del usuario
+  updateAvatar(avatarUrl) {
+    return fetch(`${this._baseUrl}/users/me/avatar`, {
+      method: 'PATCH',
+      headers: this._headers,
+      body: JSON.stringify({ avatar: avatarUrl })
+    }).then(this._checkResponse);
+  }
+}
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 4: Validación y Lógica de Componentes Integrados con API</h3>
+            
+            <p><strong>Patrón de Validación de Formularios Reutilizable:</strong></p>
+            <div class="code-block">
+// Configuración centralizada para validación
+const validationConfig = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__submit-button',
+  inactiveButtonClass: 'popup__submit-button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__error_visible'
+};
+
+// Aplicación a múltiples formularios
+const editFormValidator = new FormValidator(validationConfig, document.forms['edit-profile-form']);
+const addCardFormValidator = new FormValidator(validationConfig, document.forms['add-card-form']);
+const avatarFormValidator = new FormValidator(validationConfig, document.forms['edit-avatar-form']);
+
+editFormValidator.enableValidation();
+addCardFormValidator.enableValidation();
+avatarFormValidator.enableValidation();
+            </div>
+            
+            <p><strong>Clase Card integrada con API (likes y eliminación):</strong></p>
+            <div class="code-block">
+export default class Card {
+  constructor(data, templateSelector, handleImageClick, api) {
+    this._data = data;
+    this._id = data._id; // ID único del servidor
+    this._ownerId = data.owner._id;
+    this._currentUserId = data.currentUserId; // ID del usuario logueado
+    this._likes = data.likes || [];
+    this._templateSelector = templateSelector;
+    this._handleImageClick = handleImageClick;
+    this._api = api; // Instancia de Api inyectada
+    
+    this._isLiked = this._likes.some(like => like._id === this._currentUserId);
+  }
+
+  // Manejo de likes con comunicación a API
+  _handleLike = () => {
+    const likeMethod = this._isLiked ? this._api.removeLike : this._api.addLike;
+    
+    // Feedback visual inmediato (optimistic update)
+    this._likeButton.classList.toggle('place__like-button_active', !this._isLiked);
+    this._likesCountElement.textContent = this._isLiked ? 
+      this._likes.length - 1 : this._likes.length + 1;
+    
+    likeMethod(this._id)
+      .then((updatedCard) => {
+        this._isLiked = updatedCard.likes.some(like => like._id === this._currentUserId);
+        this._likes = updatedCard.likes;
+        this._likesCountElement.textContent = updatedCard.likes.length;
+      })
+      .catch((err) => {
+        console.error('Error updating like:', err);
+        // Revertir cambios si la API falla
+        this._likeButton.classList.toggle('place__like-button_active', this._isLiked);
+        this._likesCountElement.textContent = this._likes.length;
+      });
+  }
+
+  // Eliminación de tarjeta con confirmación y llamada a API
+  _handleDelete = () => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
+      this._api.deleteCard(this._id)
+        .then(() => {
+          this._element.remove();
+          this._element = null;
+        })
+        .catch((err) => {
+          console.error('Error deleting card:', err);
+          alert('No se pudo eliminar la tarjeta. Inténtalo de nuevo.');
+        });
+    }
+  }
+}
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 5: Integración, API y Sincronización con Backend (index.js)</h3>
+            
+            <p><strong>Flujo de inicialización ASÍNCRONO con carga de datos reales:</strong></p>
+            <div class="code-block">
+// Punto de entrada principal: index.js
+import './pages/index.css';
+import Api from '../components/Api.js';
+import Card from '../components/Card.js';
+import FormValidator from '../components/FormValidator.js';
+import PopupWithImage from '../components/PopupWithImage.js';
+import PopupWithForm from '../components/PopupWithForm.js';
+import UserInfo from '../components/UserInfo.js';
+import Section from '../components/Section.js';
+
+// Configuración
+const config = {
+  baseUrl: 'https://around-api.es.tripleten-services.com/v1',
+  headers: {
+    authorization: '152e8305-8c78-4b33-8d0b-2d99e5ea98c7',
+    'Content-Type': 'application/json'
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Inicializar la API (conexión al backend)
+  const api = new Api(config);
+  
+  // 2. Inicializar componentes de UI
+  const userInfo = new UserInfo({
+    nameSelector: '.profile__name',
+    descriptionSelector: '.profile__description',
+    avatarSelector: '.profile__avatar'
+  }, api);
+  
+  const cardSection = new Section({
+    renderer: (cardData) => {
+      const card = new Card(cardData, '#place-template', handleImageClick, api);
+      return card.generateCard();
+    }
+  }, '.places');
+  
+  // 3. CARGAR DATOS INICIALES DESDE EL SERVIDOR
+  Promise.all([api.getUserInfo(), api.getInitialCards()])
+    .then(([userData, cardsData]) => {
+      // 3a. Poblar el perfil con datos del servidor
+      userInfo.setUserInfo({
+        name: userData.name,
+        about: userData.about,
+        avatar: userData.avatar,
+        _id: userData._id
+      });
+      
+      // 3b. Renderizar la galería con tarjetas del servidor
+      const cardsWithUserContext = cardsData.map(card => ({
+        ...card,
+        currentUserId: userData._id
+      }));
+      cardSection.renderItems(cardsWithUserContext);
+    })
+    .catch((err) => {
+      console.error('Error loading initial data:', err);
+      // Mostrar mensaje de error al usuario
+      alert('Error al cargar los datos. Por favor, recarga la página.');
+    });
+  
+  // 4. Configurar popups y manejadores de eventos...
+  const editProfilePopup = new PopupWithForm('.popup_type_edit-profile', 
+    (formData) => handleProfileUpdate(formData, api, userInfo, editProfilePopup));
+  
+  const addCardPopup = new PopupWithForm('.popup_type_add-card',
+    (formData) => handleAddCardSubmit(formData, api, cardSection, addCardPopup));
+  
+  // 5. Configurar event listeners para botones de apertura
+  document.querySelector('.profile__edit-button').addEventListener('click', () => {
+    const currentUserInfo = userInfo.getUserInfo();
+    editProfilePopup.setInputValues(currentUserInfo);
+    editFormValidator.resetValidation();
+    editProfilePopup.open();
+  });
+  
+  document.querySelector('.profile__add-button').addEventListener('click', () => {
+    addCardFormValidator.resetValidation();
+    addCardPopup.open();
+  });
+});
+            </div>
+            
+            <p><strong>Manejo ASÍNCRONO de la creación de tarjetas:</strong></p>
+            <div class="code-block">
+// Función manejadora para creación de tarjetas
+function handleAddCardSubmit(formData, api, cardSection, popupInstance) {
+  // Mostrar estado de "cargando"
+  popupInstance.renderLoading(true, 'Creando...');
+  
+  // Enviar datos al servidor
+  api.addNewCard(formData)
+    .then((cardDataFromServer) => {
+      // Obtener el ID del usuario actual para contexto de likes
+      return api.getUserInfo()
+        .then(userData => ({
+          ...cardDataFromServer,
+          currentUserId: userData._id
+        }));
+    })
+    .then((cardWithUserContext) => {
+      // Crear y renderizar la tarjeta con datos del servidor
+      const newCard = new Card(
+        cardWithUserContext, 
+        '#place-template', 
+        handleImageClick, 
+        api
+      );
+      const cardElement = newCard.generateCard();
+      cardSection.addItem(cardElement);
+      popupInstance.close();
+    })
+    .catch((err) => {
+      console.error('Error creating card:', err);
+      alert('No se pudo crear la tarjeta. Verifica la URL de la imagen.');
+    })
+    .finally(() => {
+      // Ocultar estado de "cargando"
+      popupInstance.renderLoading(false);
+    });
+}
+
+// Función manejadora para actualización de perfil
+function handleProfileUpdate(formData, api, userInfo, popupInstance) {
+  popupInstance.renderLoading(true, 'Guardando...');
+  
+  api.updateUserInfo(formData)
+    .then((updatedUserData) => {
+      userInfo.setUserInfo({
+        name: updatedUserData.name,
+        about: updatedUserData.about
+      });
+      popupInstance.close();
+    })
+    .catch((err) => {
+      console.error('Error updating profile:', err);
+      alert('No se pudo actualizar el perfil. Inténtalo de nuevo.');
+    })
+    .finally(() => {
+      popupInstance.renderLoading(false);
+    });
+}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>⚡ Desafíos Técnicos y Soluciones</h2>
+        
+        <div class="challenge">
+            <h4>Desafío 1: Acoplamiento excesivo entre lógica de UI y datos</h4>
+            <p><strong>Problema:</strong> El código para crear tarjetas, validar formularios y manejar popups estaba mezclado con lógica de datos, dificultando el mantenimiento y reutilización.</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Refactorización a un sistema de Clases con responsabilidades únicas</h4>
+            <p>Crear clases independientes (<code>Card</code>, <code>FormValidator</code>, <code>Popup*</code>) que encapsulen una única responsabilidad y se comuniquen a través de interfaces públicas claras. La clase <code>Api</code> separa completamente la lógica de comunicación con el backend.</p>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 2: Sincronización UI con estado del servidor</h4>
+            <p><strong>Problema:</strong> Cada acción del usuario (like, eliminar, editar) debe reflejarse en la UI pero también persistirse en el servidor. Manejar estados de espera, éxito y error sin romper la UX era complejo.</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Patrón de actualización optimista + manejo robusto de promesas</h4>
+            <p>Implementar un flujo donde la UI se actualiza inmediatamente (optimista), luego se sincroniza con el servidor. Se añade feedback visual durante la carga (<code>renderLoading()</code>) y manejo de errores para revertir cambios si falla la API.</p>
+            <div class="code-block">
+// Ejemplo: Manejo optimista de likes en la clase Card
+_handleLike() {
+  const likeMethod = this._isLiked ? this._api.removeLike : this._api.addLike;
+  
+  // 1. Actualización OPTIMISTA inmediata en la UI
+  this._likeButton.classList.toggle('place__like-button_active', !this._isLiked);
+  this._likesCountElement.textContent = this._isLiked ? 
+    this._likes.length - 1 : this._likes.length + 1;
+  
+  // 2. Llamada a la API para persistir
+  likeMethod(this._id)
+    .then((updatedCard) => {
+      // 3. Sincronizar con estado real del servidor
+      this._isLiked = updatedCard.likes.some(like => like._id === this._currentUserId);
+      this._likes = updatedCard.likes;
+      this._likesCountElement.textContent = updatedCard.likes.length;
+    })
+    .catch((err) => {
+      // 4. REVERTIR si la API falla
+      console.error('Error updating like:', err);
+      this._likeButton.classList.toggle('place__like-button_active', this._isLiked);
+      this._likesCountElement.textContent = this._likes.length;
+    });
+}
+            </div>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 3: Carga inicial de datos interdependientes</h4>
+            <p><strong>Problema:</strong> Necesidad de cargar información de usuario Y tarjetas iniciales antes de renderizar la interfaz, donde las tarjetas necesitan el ID del usuario para determinar el estado de "like".</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: <code>Promise.all()</code> + enriquecimiento de datos</h4>
+            <p>Usar <code>Promise.all()</code> para cargar datos de usuario y tarjetas en paralelo, luego enriquecer cada tarjeta con el contexto del usuario actual antes del renderizado.</p>
+            <div class="code-block">
+// Carga paralela de datos iniciales
+Promise.all([api.getUserInfo(), api.getInitialCards()])
+  .then(([userData, cardsData]) => {
+    // Enriquecer cada tarjeta con el ID del usuario actual
+    const cardsWithUserContext = cardsData.map(card => ({
+      ...card,
+      currentUserId: userData._id  // ← Contexto crucial para likes
+    }));
+    
+    // Renderizar con datos enriquecidos
+    cardSection.renderItems(cardsWithUserContext);
+  });
+            </div>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 4: Gestión de autorizaciones y permisos</h4>
+            <p><strong>Problema:</strong> Algunas acciones (eliminar tarjetas) solo deben estar disponibles para el propietario. El icono de eliminar no debe mostrarse a otros usuarios.</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Verificación de propiedad en tiempo de renderizado</h4>
+            <p>Comparar el <code>owner._id</code> de cada tarjeta con el <code>_id</code> del usuario actual durante la creación de la tarjeta, y condicionalmente mostrar/ocultar el botón de eliminar.</p>
+            <div class="code-block">
+// En la clase Card, durante la creación del elemento
+generateCard() {
+  // ... creación del elemento ...
+  
+  // Mostrar botón de eliminar solo si el usuario es el propietario
+  if (this._ownerId !== this._currentUserId) {
+    this._deleteButton.style.display = 'none';
+  }
+  
+  return this._element;
+}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>🏗️ Arquitectura de Decisiones</h2>
+        
+        <h3>Separación de Responsabilidades por Capa</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>🌐 Capa de Servicio: <code>Api.js</code></h4>
+                <p><strong>Responsabilidad:</strong> Todas las comunicaciones HTTP con el backend REST.</p>
+                <p><strong>Ventaja:</strong> Centralización de URLs, headers, manejo de errores de red. Fácil de mockear para testing.</p>
+            </div>
+            <div class="card">
+                <h4>🧩 Capa de Componentes: <code>Card.js</code>, <code>UserInfo.js</code></h4>
+                <p><strong>Responsabilidad:</strong> Representación visual y comportamiento de elementos UI específicos.</p>
+                <p><strong>Ventaja:</strong> Reciben dependencias (API) por inyección, son testables y reutilizables.</p>
+            </div>
+            <div class="card">
+                <h4>🔄 Capa de Estado: <code>UserInfo.js</code> (parcial)</h4>
+                <p><strong>Responsabilidad:</strong> Gestionar y sincronizar el estado de la aplicación con el servidor.</p>
+                <p><strong>Ventaja:</strong> Separación clara entre datos y representación.</p>
+            </div>
+            <div class="card">
+                <h4>🎨 Capa de UI: <code>Popup.js</code>, <code>FormValidator.js</code></h4>
+                <p><strong>Responsabilidad:</strong> Comportamiento de interfaz independiente del negocio.</p>
+                <p><strong>Ventaja:</strong> Componentes puros de UI que pueden usarse en cualquier contexto.</p>
+            </div>
+            <div class="card">
+                <h4>🔌 Capa de Integración: <code>index.js</code></h4>
+                <p><strong>Responsabilidad:</strong> Conectar todas las capas, inicializar la aplicación, manejar eventos globales.</p>
+                <p><strong>Ventaja:</strong> Punto único de configuración y entrada a la aplicación.</p>
+            </div>
+        </div>
+        
+        <h3>Patrones y Principios Utilizados</h3>
+        <table>
+            <tr>
+                <th>Patrón / Principio</th>
+                <th>Implementación</th>
+                <th>Beneficio</th>
+            </tr>
+            <tr>
+                <td>Single Responsibility (SOLID)</td>
+                <td>Cada clase tiene una única razón para cambiar (Api solo comunica, Card solo representa, etc.)</td>
+                <td>Código más fácil de testear, mantener y depurar.</td>
+            </tr>
+            <tr>
+                <td>Dependency Injection</td>
+                <td>La instancia de <code>Api</code> se inyecta en <code>Card</code>, <code>UserInfo</code>, etc., no se crea internamente.</td>
+                <td>Componentes desacoplados, fáciles de testear con mocks.</td>
+            </tr>
+            <tr>
+                <td>Optimistic Updates</td>
+                <td>UI se actualiza inmediatamente mientras la llamada a API se procesa en segundo plano.</td>
+                <td>Mejor experiencia de usuario (responsividad inmediata).</td>
+            </tr>
+            <tr>
+                <td>Módulos ES6</td>
+                <td>Cada clase en su archivo, exportada/importada según dependencias.</td>
+                <td>Estructura de proyecto clara, scope controlado, árbol de dependencias explícito.</td>
+            </tr>
+            <tr>
+                <td>Error Boundaries (implícito)</td>
+                <td>Cada llamada a API incluye <code>.catch()</code> para manejo local de errores.</td>
+                <td>La aplicación no se rompe completamente por errores en una parte específica.</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>📱 Flujo de Trabajo Completo: Añadir Nueva Tarjeta</h2>
+        
+        <ol>
+            <li><strong>Usuario hace clic en el botón "+"</strong> → Event listener en <code>index.js</code> llama a <code>addCardPopup.open()</code>.</li>
+            <li><strong>Usuario llena el formulario</strong> → <code>FormValidator</code> valida en tiempo real, mostrando errores y controlando el botón de envío.</li>
+            <li><strong>Usuario hace clic en "Crear"</strong> → <code>PopupWithForm</code> intercepta el submit, llama al manejador con los datos del formulario.</li>
+            <li><strong>Envío a servidor y feedback</strong>:
+                <div class="code-block">
+// 4a. Mostrar estado de "cargando" en el botón
+popupInstance.renderLoading(true, 'Creando...');
+
+// 4b. Llamar a la API para crear la tarjeta en el servidor
+api.addNewCard(formData)
+  .then((cardDataFromServer) => {
+    // 4c. Obtener información del usuario actual para contexto
+    return api.getUserInfo()
+      .then(userData => ({
+        ...cardDataFromServer,
+        currentUserId: userData._id  // ← Para determinar estado de like
+      }));
+  })
+                </div>
+            </li>
+            <li><strong>Procesamiento de respuesta exitosa</strong>:
+                <div class="code-block">
+// 5a. Crear instancia de Card con datos enriquecidos del servidor
+const newCard = new Card(cardWithUserContext, '#place-template', handleImageClick, api);
+
+// 5b. Generar el elemento DOM
+const cardElement = newCard.generateCard();
+
+// 5c. Agregar la tarjeta al principio de la galería
+cardSection.addItem(cardElement);
+
+// 5d. Cerrar el popup
+popupInstance.close();
+                </div>
+            </li>
+            <li><strong>Finalización y limpieza</strong>:
+                <div class="code-block">
+// 6. Ocultar estado de "cargando" (en finally, se ejecuta siempre)
+popupInstance.renderLoading(false);
+                </div>
+            </li>
+            <li><strong>La UI resultante</strong>:
+                <ul>
+                    <li>Nueva tarjeta aparece al principio de la galería con todos los datos del servidor.</li>
+                    <li>Botones de like y eliminar son funcionales (eliminar solo visible si el usuario es el propietario).</li>
+                    <li>Hacer clic en la imagen abre el popup de vista previa.</li>
+                    <li>La tarjeta persiste después de recargar la página (está guardada en la base de datos del servidor).</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>🎓 Lecciones Aprendidas</h2>
+        
+        <h3>Lo que funcionó bien ✅</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>Arquitectura por capas con Api separada</h4>
+                <p>Separar completamente la lógica de comunicación HTTP en la clase <code>Api</code> hizo el código más limpio y testeable.</p>
+            </div>
+            <div class="card">
+                <h4>Inyección de dependencias</h4>
+                <p>Pasar la instancia de <code>Api</code> a los componentes que la necesitan (en lugar de crear una instancia global) facilitó testing y mantuvo responsabilidades claras.</p>
+            </div>
+            <div class="card">
+                <h4>Actualizaciones optimistas</h4>
+                <p>Mejoró significativamente la percepción de velocidad de la aplicación, aunque requirió lógica adicional para manejar reversiones en caso de error.</p>
+            </div>
+            <div class="card">
+                <h4>Promise.all() para carga inicial</h4>
+                <p>Cargar datos de usuario y tarjetas en paralelo redujo significativamente el tiempo de carga inicial de la aplicación.</p>
+            </div>
+        </div>
+        
+        <h3>Mejoras posibles 🔧</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>Manejo de estado global</h4>
+                <p>Para aplicaciones más grandes, un sistema de gestión de estado (como un store simple) evitaría pasar el userId por toda la aplicación.</p>
+            </div>
+            <div class="card">
+                <h4>Manejo de errores más robusto</h4>
+                <p>Implementar un sistema centralizado de notificaciones de errores en lugar de múltiples <code>alert()</code> dispersos.</p>
+            </div>
+            <div class="card">
+                <h4>Loading states más elaborados</h4>
+                <p>Agregar skeletons o placeholders durante la carga inicial en lugar de mostrar una galería vacía.</p>
+            </div>
+            <div class="card">
+                <h4>Paginación o scroll infinito</h4>
+                <p>Para galerías con muchas imágenes, implementar carga paginada en lugar de cargar todas las tarjetas a la vez.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>📝 Puntos Clave para Replicar</h2>
+        
+        <ol>
+            <li><strong>Comienza con el diseño de la API:</strong> Antes de codificar el frontend, define claramente qué endpoints necesitas y qué datos devuelven.</li>
+            <li><strong>Crea una capa de servicio API independiente:</strong> Separa toda la lógica HTTP en una clase dedicada (<code>Api.js</code>). Esto facilita testing y mantenimiento.</li>
+            <li><strong>Diseña componentes que reciban dependencias:</strong> En lugar de crear instancias de API dentro de los componentes, recíbelas por parámetro (inyección de dependencias).</li>
+            <li><strong>Implementa actualizaciones optimistas con reversión:</strong> Actualiza la UI inmediatamente, pero siempre incluye lógica para revertir si la llamada a API falla.</li>
+            <li><strong>Maneja la carga inicial eficientemente:</strong> Usa <code>Promise.all()</code> para cargar datos interdependientes en paralelo cuando sea posible.</li>
+            <li><strong>Considera el contexto del usuario:</strong> Muchas operaciones (likes, eliminación) requieren conocer el ID del usuario actual. Planifica cómo pasar este contexto.</li>
+            <li><strong>Centraliza la configuración:</strong> Usa objetos de configuración para URLs, headers, selectores CSS y reglas de validación.</li>
+        </ol>
+    </section>
+
+    <footer>
+        <p>📄 Documentación técnica creada para el proyecto de Galería Interactiva "Around (ES)"</p>
+        <p>🔄 Última actualización: <span id="current-date"></span></p>
+        <p>🏷️ Versión: 2.0 (Con integración completa de API REST)</p>
+    </footer>
+
+    <script>
+        // Fecha actual automática
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Efecto de scroll suave para anclas
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+        
+        // Resaltar bloques de código al hacer clic (para copiar)
+        document.querySelectorAll('.code-block').forEach(block => {
+            block.addEventListener('click', function() {
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Feedback visual temporal
+                const originalBackground = this.style.backgroundColor;
+                this.style.backgroundColor = '#e3f2fd';
+                setTimeout(() => {
+                    this.style.backgroundColor = originalBackground;
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

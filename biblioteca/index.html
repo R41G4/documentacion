@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación: Biblioteca Triple Peaks</title>
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+    <header>
+        <h1>📚 Proyecto: Página Web de la Biblioteca Triple Peaks</h1>
+        <p class="subtitle">Guía de desarrollo - Maquetación con HTML semántico, CSS Flexbox y Metodología BEM</p>
+        <div class="metadata">
+            <span class="tag">🎨 Tipo: Maquetación Frontend Estática</span>
+            <span class="tag">🧱 Tecnologías: HTML5, CSS3, BEM</span>
+            <span class="tag">⚙️ Características: Semántica, Flexbox, Posicionamiento, Metodología BEM</span>
+        </div>
+    </header>
+
+    <section>
+        <h2>🎯 Objetivo del Proyecto</h2>
+        <p>Crear la página web estática de una biblioteca moderna y visualmente atractiva, aplicando de forma práctica los fundamentos del desarrollo frontend con metodologías organizativas:</p>
+        <ul>
+            <li>Implementar una estructura sólida y accesible utilizando <strong>HTML5 semántico</strong>.</li>
+            <li>Organizar el CSS de manera escalable y mantenible mediante la <strong>metodología BEM (Block-Element-Modifier)</strong>.</li>
+            <li>Dominar el layout y la distribución de elementos mediante <strong>CSS Flexbox</strong>.</li>
+            <li>Aplicar técnicas de <strong>posicionamiento CSS</strong> (relative, absolute) para componentes específicos.</li>
+            <li>Seguir fielmente un brief de diseño proporcionado, traduciendo una imagen de diseño a código.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>🚀 Fases de Desarrollo</h2>
+        
+        <div class="phase">
+            <h3>Fase 1: Análisis y Estructura Semántica con BEM en mente</h3>
+            <p><strong>Enfoque:</strong> Traducir el diseño visual a una jerarquía de contenido lógica, identificando los "Bloques" independientes para aplicar BEM.</p>
+            <p><strong>Bloques (Blocks) principales identificados:</strong></p>
+            <div class="grid">
+                <div class="card">
+                    <h4>🔖 <code>header</code> (Bloque)</h4>
+                    <p>Contenedor del logo y navegación principal. Elementos: <code>header__logo</code>, <code>header__nav</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>🌟 <code>hero</code> (Bloque)</h4>
+                    <p>Sección principal con imagen de fondo, título y botón. Elementos: <code>hero__title</code>, <code>hero__description</code>, <code>hero__button</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>📖 <code>card</code> (Bloque)</h4>
+                    <p>Componente reutilizable para mostrar ambientes de lectura. Elementos: <code>card__image</code>, <code>card__content</code>, <code>card__title</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>🔁 <code>events</code> (Bloque)</h4>
+                    <p>Contenedor horizontal para el carrusel de eventos. Elementos: <code>events__title</code>, <code>events__list</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>📚 <code>membership</code> (Bloque)</h4>
+                    <p>Sección que describe los planes. Elementos: <code>membership__title</code>, <code>membership__cards</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>🏷️ <code>about</code> (Bloque)</h4>
+                    <p>Sección "Acerca de" con círculo decorativo. Elementos: <code>about__title</code>, <code>about__circle</code>, <code>about__text</code>.</p>
+                </div>
+                <div class="card">
+                    <h4>👣 <code>footer</code> (Bloque)</h4>
+                    <p>Pie de página con columnas. Elementos: <code>footer__columns</code>, <code>footer__column</code>, <code>footer__logo</code>.</p>
+                </div>
+            </div>
+            
+            <p><strong>Técnica clave:</strong> Planificación de la estructura BEM antes de escribir CSS.</p>
+            <div class="code-block">
+&lt;!-- Ejemplo de un Bloque "card" con la nomenclatura BEM --&gt;
+&lt;section class="card"&gt; &lt;!-- Bloque --&gt;
+  &lt;img src="images/card-image.jpg" alt="..." class="card__image"&gt; &lt;!-- Elemento --&gt;
+  &lt;div class="card__content"&gt; &lt;!-- Elemento --&gt;
+    &lt;h3 class="card__title"&gt;Para los amantes del café&lt;/h3&gt; &lt;!-- Elemento --&gt;
+    &lt;p class="card__description"&gt;...&lt;/p&gt; &lt;!-- Elemento --&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;!-- Ejemplo de un Modificador --&gt;
+&lt;button class="button"&gt;Normal&lt;/button&gt;
+&lt;button class="button button_highlighted"&gt;Destacado&lt;/button&gt; &lt;!-- Bloque + Modificador --&gt;
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 2: Estilos con CSS Flexbox y Metodología BEM</h3>
+            <p><strong>Metodología:</strong> CSS organizado siguiendo la convención BEM, utilizando Flexbox para los layouts.</p>
+            
+            <p><strong>Implementación de un sistema de tarjetas con BEM y Flexbox:</strong></p>
+            <div class="code-block">
+/* BLOQUE: Contenedor principal de tarjetas */
+.cards {
+  display: flex;           /* Flexbox para el layout */
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+/* BLOQUE: La tarjeta individual */
+.card {
+  display: flex;           /* Flexbox interno */
+  flex-direction: column;
+  width: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* ELEMENTO: La imagen dentro del bloque .card */
+.card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;      /* Ajusta la imagen sin distorsionar */
+}
+
+/* ELEMENTO: El contenedor de contenido dentro de .card */
+.card__content {
+  flex-grow: 1;           /* Ocupa el espacio disponible */
+  padding: 20px;
+  display: flex;
+  flex-direction: column; /* Organiza título y descripción en columna */
+}
+
+/* ELEMENTO: El título dentro de .card__content */
+.card__title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* ELEMENTO: La descripción dentro de .card__content */
+.card__description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+            </div>
+            
+            <p><strong>Posicionamiento con BEM para elementos decorativos:</strong></p>
+            <div class="code-block">
+/* BLOQUE: Sección "about" */
+.about {
+  position: relative;      /* Contexto para posicionamiento absoluto */
+  overflow: hidden;
+  padding: 80px 0;
+}
+
+/* ELEMENTO: Círculo decorativo dentro de .about */
+.about__circle {
+  background-color: #2f80ed;
+  width: 465px;
+  height: 465px;
+  border-radius: 50%;
+
+  /* Posicionamiento absoluto respecto a .about */
+  position: absolute;
+  top: -121px;
+  left: -91px;
+  z-index: 1;             /* Control del orden de apilamiento */
+}
+
+/* ELEMENTO: Texto dentro de .about */
+.about__text {
+  position: relative;     /* Se coloca sobre el círculo */
+  z-index: 2;            /* Mayor z-index que el círculo */
+  max-width: 600px;
+}
+            </div>
+        </div>
+
+        <div class="phase">
+            <h3>Fase 3: Responsividad y Modificadores BEM</h3>
+            
+            <p><strong>Enfoque:</strong> Usar media queries junto con modificadores BEM para adaptar el diseño.</p>
+            
+            <p><strong>Modificadores BEM para estados responsivos:</strong></p>
+            <div class="code-block">
+/* MODIFICADOR para el bloque .cards en vista móvil */
+.cards_layout_mobile {
+  flex-direction: column;
+  align-items: center;
+}
+
+/* MODIFICADOR para el bloque .card en vista móvil */
+.card_size_mobile {
+  width: 90%;
+  max-width: 400px;
+}
+
+/* En el HTML se aplicarían condicionalmente con JavaScript o directamente con media queries */
+@media screen and (max-width: 480px) {
+  .cards {
+    /* Se aplican los estilos del modificador directamente */
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .card {
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  /* MODIFICADOR BEM para ocultar elementos en móvil */
+  .header__nav_hidden_mobile {
+    display: none;
+  }
+  
+  /* Elemento con modificador para cambiar disposición */
+  .footer__columns_direction_column {
+    flex-direction: column;
+    text-align: center;
+    gap: 30px;
+  }
+}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>⚡ Desafíos Técnicos y Soluciones</h2>
+        
+        <div class="challenge">
+            <h4>Desafío 1: Mantener la coherencia BEM en un proyecto con múltiples componentes</h4>
+            <p><strong>Problema:</strong> Con muchos bloques y elementos, era fácil perder la consistencia en la nomenclatura (guiones simples vs dobles, nombres muy largos).</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Establecer y seguir una convención clara desde el inicio</h4>
+            <p>Definir reglas simples: Bloque en inglés y descriptivo (<code>.card</code>), elementos con doble guion bajo (<code>.card__image</code>), modificadores con doble guion bajo (<code>.card_highlighted</code>). Usar nombres basados en función, no en apariencia.</p>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 2: Posicionar el círculo azul sin romper la metodología BEM</h4>
+            <p><strong>Problema:</strong> El elemento decorativo necesitaba posicionamiento absoluto, pero debía mantenerse como un elemento dentro del bloque <code>.about</code>.</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Crear el elemento <code>about__circle</code> con posicionamiento absoluto</h4>
+            <p>Mantener el círculo como un elemento más del bloque <code>.about</code> (<code>.about__circle</code>), aplicando <code>position: absolute</code> y controlando su contexto con <code>position: relative</code> en el bloque padre. Esto mantiene la relación semántica BEM.</p>
+            <div class="code-block">
+/* Bloque padre proporciona contexto */
+.about {
+  position: relative; /* Contexto para posicionamiento */
+}
+
+/* Elemento posicionado absolutamente */
+.about__circle {
+  position: absolute;
+  top: -121px;
+  left: -91px;
+  /* ... más estilos ... */
+}
+            </div>
+        </div>
+        
+        <div class="challenge">
+            <h4>Desafío 3: Gestionar el espaciado entre componentes BEM</h4>
+            <p><strong>Problema:</strong> Decidir si el margen entre bloques (ej: entre <code>.card</code> y <code>.events</code>) debe definirse en el bloque superior o en cada bloque individual.</p>
+        </div>
+        <div class="solution">
+            <h4>Solución: Los bloques no deben saber de su entorno - margen en el contenedor</h4>
+            <p>Aplicar la filosofía BEM de manera estricta: cada bloque es independiente y reusable. El espaciado entre bloques se controla desde un contenedor superior (como <code>.page</code> o <code>.section</code>) usando propiedades como <code>gap</code> en Flexbox/Grid o <code>margin-bottom</code> en contenedores de bloques.</p>
+            <div class="code-block">
+/* CORRECTO: El contenedor maneja el espaciado */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 60px; /* Espacio uniforme entre bloques hijos */
+}
+
+/* Cada bloque es independiente y no tiene márgenes que dependan de otros */
+.card { /* Sin margin-bottom */ }
+.events { /* Sin margin-top */ }
+
+/* INCORRECTO según BEM: El bloque sabe sobre otros bloques */
+.card {
+  margin-bottom: 60px; /* Esto acopla .card a lo que viene después */
+}
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>🏗️ Arquitectura de Decisiones: BEM en la Práctica</h2>
+        
+        <h3>Principios BEM Aplicados</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>🧱 Independencia del Bloque</h4>
+                <p><strong>Regla:</strong> Cada bloque (<code>.header</code>, <code>.card</code>) debe ser autocontenido y reusable en cualquier parte del sitio.</p>
+                <p><strong>Implementación:</strong> No usar selectores de tipo (<code>section.card</code>) ni IDs para estilizar. Usar solo clases.</p>
+            </div>
+            <div class="card">
+                <h4>🔗 Elementos Anidados</h4>
+                <p><strong>Regla:</strong> Los elementos pertenecen estrictamente a su bloque. No existen elementos sueltos.</p>
+                <p><strong>Implementación:</strong> <code>.block__element</code> nunca se usa fuera de <code>.block</code>. Para anidamientos profundos: <code>.block__element__subelement</code> NO; mejor crear nuevo bloque.</p>
+            </div>
+            <div class="card">
+                <h4>🎭 Modificadores para Variaciones</h4>
+                <p><strong>Regla:</strong> Los modificadores cambian la apariencia o comportamiento de un bloque/elemento.</p>
+                <p><strong>Implementación:</strong> <code>.block_modifier</code> o <code>.block__element_modifier</code>. En HTML: <code>class="block block_modifier"</code>.</p>
+            </div>
+            <div class="card">
+                <h4>📁 Organización de Archivos</h4>
+                <p><strong>Regla:</strong> Estructurar CSS/SCSS por bloques, no por páginas o secciones.</p>
+                <p><strong>Implementación:</strong> Archivos separados o secciones claras para cada bloque: <code>_header.css</code>, <code>_card.css</code>, <code>_footer.css</code>.</p>
+            </div>
+        </div>
+        
+        <h3>Estructura de Nomenclatura BEM en el Proyecto</h3>
+        <table>
+            <tr>
+                <th>Tipo</th>
+                <th>Ejemplo</th>
+                <th>Descripción</th>
+                <th>Uso Correcto</th>
+            </tr>
+            <tr>
+                <td>Bloque (Block)</td>
+                <td><code>.card</code></td>
+                <td>Componente independiente y reusable</td>
+                <td><code>&lt;article class="card"&gt;</code></td>
+            </tr>
+            <tr>
+                <td>Elemento (Element)</td>
+                <td><code>.card__image</code></td>
+                <td>Parte de un bloque que no tiene sentido por sí sola</td>
+                <td><code>&lt;img class="card__image"&gt;</code></td>
+            </tr>
+            <tr>
+                <td>Modificador (Modifier)</td>
+                <td><code>.card_highlighted</code></td>
+                <td>Variante de un bloque o elemento</td>
+                <td><code>&lt;article class="card card_highlighted"&gt;</code></td>
+            </tr>
+            <tr>
+                <td>Elemento con Modificador</td>
+                <td><code>.card__button_disabled</code></td>
+                <td>Variante de un elemento específico</td>
+                <td><code>&lt;button class="card__button card__button_disabled"&gt;</code></td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>📱 Flujo de Trabajo: Implementación de un Componente con BEM</h2>
+        
+        <ol>
+            <li><strong>Identificar el Bloque:</strong> "Necesito mostrar información en un formato de tarjeta" → Bloque: <code>.card</code></li>
+            <li><strong>Definir los Elementos:</strong> "La tarjeta tendrá imagen, título, descripción" → Elementos: <code>.card__image</code>, <code>.card__title</code>, <code>.card__description</code></li>
+            <li><strong>Crear el HTML con estructura BEM:</strong>
+                <div class="code-block">
+&lt;!-- Bloque .card --&gt;
+&lt;article class="card"&gt;
+  &lt;!-- Elemento .card__image --&gt;
+  &lt;img src="image.jpg" alt="..." class="card__image"&gt;
+  
+  &lt;!-- Elemento .card__content (contiene otros elementos) --&gt;
+  &lt;div class="card__content"&gt;
+    &lt;!-- Elemento .card__title --&gt;
+    &lt;h3 class="card__title"&gt;Título de la tarjeta&lt;/h3&gt;
+    
+    &lt;!-- Elemento .card__description --&gt;
+    &lt;p class="card__description"&gt;Descripción detallada...&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/article&gt;
+                </div>
+            </li>
+            <li><strong>Escribir CSS siguiendo BEM:</strong>
+                <div class="code-block">
+/* Estilos para el BLOQUE .card */
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para el ELEMENTO .card__image */
+.card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Estilos para el ELEMENTO .card__content */
+.card__content {
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos para el ELEMENTO .card__title */
+.card__title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* Estilos para el ELEMENTO .card__description */
+.card__description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+                </div>
+            </li>
+            <li><strong>Agregar Modificadores si es necesario:</strong>
+                <div class="code-block">
+&lt;!-- Tarjeta con modificador de destacado --&gt;
+&lt;article class="card card_highlighted"&gt;
+  ...
+&lt;/article&gt;
+
+/* MODIFICADOR para el bloque .card */
+.card_highlighted {
+  border: 2px solid #2f80ed;
+  box-shadow: 0 6px 12px rgba(47, 128, 237, 0.2);
+}
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>🎓 Lecciones Aprendidas</h2>
+        
+        <h3>Lo que funcionó bien ✅</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>BEM para escalabilidad</h4>
+                <p>La metodología BEM demostró ser invaluable para mantener el CSS organizado a medida que el proyecto crecía. Los nombres de clase fueron autoexplicativos.</p>
+            </div>
+            <div class="card">
+                <h4>Independencia de componentes</h4>
+                <p>Al tratar cada sección como un "bloque" independiente, fue fácil reordenar, reutilizar o eliminar componentes sin afectar otros estilos.</p>
+            </div>
+            <div class="card">
+                <h4>Flexibilidad de Flexbox + BEM</h4>
+                <p>La combinación de Flexbox (para layout) y BEM (para estructura de clases) creó una base muy sólida y mantenible.</p>
+            </div>
+        </div>
+        
+        <h3>Mejoras posibles 🔧</h3>
+        <div class="grid">
+            <div class="card">
+                <h4>Preprocesadores (SCSS/Sass) con BEM</h4>
+                <p>Usar SCSS habría permitido anidar elementos BEM de forma más legible (<code>.card { &__image { ... } }</code>) manteniendo la salida CSS plana.</p>
+            </div>
+            <div class="card">
+                <h4>Sistema de diseño más formal</h4>
+                <p>Definir variables CSS para colores, espaciados y tipografía desde el inicio, integradas con la metodología BEM.</p>
+            </div>
+            <div class="card">
+                <h4>Documentación de componentes</h4>
+                <p>Crear una pequeña guía de componentes (Storybook básico) que muestre todos los bloques disponibles y sus modificadores.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>📝 Puntos Clave para Replicar (BEM + Flexbox)</h2>
+        
+        <ol>
+            <li><strong>Planifica antes de codificar:</strong> Identifica los bloques principales de tu diseño antes de escribir cualquier CSS. Haz una lista.</li>
+            <li><strong>Sé consistente con la nomenclatura BEM:</strong> Establece reglas claras (inglés, nombres descriptivos, doble guion bajo) y síguelas estrictamente.</li>
+            <li><strong>Mantén la independencia de bloques:</strong> Cada bloque debe funcionar por sí solo. Evita estilos que dependan de la posición del bloque en la página.</li>
+            <li><strong>Usa Flexbox para layouts internos:</strong> Para la disposición de elementos dentro de un bloque, Flexbox es generalmente la mejor opción.</li>
+            <li><strong>Los modificadores son para variaciones, no para posicionamiento:</strong> Usa modificadores para cambios de color, tamaño o estado, no para márgenes que dependan del contexto.</li>
+            <li><strong>Organiza tu CSS por bloques:</strong> Agrupa todos los estilos relacionados con un bloque (y sus elementos/modificadores) juntos en el archivo CSS.</li>
+            <li><strong>Comienza con HTML semántico:</strong> BEM funciona sobre una buena base HTML. Usa las etiquetas correctas (<code>&lt;header&gt;</code>, <code>&lt;section&gt;</code>, etc.) y luego añade clases BEM.</li>
+        </ol>
+    </section>
+
+    <footer>
+        <p>📄 Documentación técnica creada para el proyecto "Biblioteca Triple Peaks"</p>
+        <p>🔄 Última actualización: <span id="current-date"></span></p>
+        <p>🏷️ Versión: 2.0 (Con énfasis en metodología BEM)</p>
+    </footer>
+
+    <script>
+        // Fecha actual automática
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Efecto de scroll suave para anclas
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+        
+        // Resaltar bloques de código al hacer clic (para copiar)
+        document.querySelectorAll('.code-block').forEach(block => {
+            block.addEventListener('click', function() {
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                // Feedback visual temporal
+                const originalBackground = this.style.backgroundColor;
+                this.style.backgroundColor = '#e3f2fd';
+                setTimeout(() => {
+                    this.style.backgroundColor = originalBackground;
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
